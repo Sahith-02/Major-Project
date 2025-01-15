@@ -1,0 +1,10 @@
+Flask
+Flask-Cors
+SQLAlchemy
+nltk
+spacy
+transformers
+numpy
+pandas
+psycopg2-binary
+
