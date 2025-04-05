@@ -1,15 +1,36 @@
-from flask_sqlalchemy import SQLAlchemy 
+from models.database import connect_to_db
 
-db = SQLAlchemy()
-
-class Question(db.Model):
-    __tablename__ = 'questions'  # Specify the table name explicitly
-
-    id = db.Column(db.Integer, primary_key=True)
-    question_text = db.Column(db.Text, nullable=False)  # Use Text for potentially long questions
-    subject = db.Column(db.String(50), nullable=False)
-    difficulty = db.Column(db.String(10), nullable=False)  # 'easy', 'medium', 'hard'
-    correct_answer = db.Column(db.Text, nullable=False)  # Store answers as text for keyword matching
-
-    def __repr__(self):
-        return f"<Question {self.id} - {self.subject} - {self.difficulty}>"
+def fetch_question_from_db(subject, difficulty, asked_questions):
+    connection = connect_to_db()
+    if not connection:
+        return None
+    try:
+        with connection.cursor() as cursor:
+            if asked_questions:
+                asked_questions_tuple = tuple(asked_questions)
+                query = """
+                SELECT question_text
+                FROM questions
+                WHERE subject = %s AND difficulty = %s
+                AND question_text NOT IN %s
+                ORDER BY RANDOM()
+                LIMIT 1;
+                """
+                cursor.execute(query, (subject, difficulty, asked_questions_tuple))
+            else:
+                query = """
+                SELECT question_text
+                FROM questions
+                WHERE subject = %s AND difficulty = %s
+                ORDER BY RANDOM()
+                LIMIT 1;
+                """
+                cursor.execute(query, (subject, difficulty))
+            result = cursor.fetchone()
+            print(result)
+            return result[0] if result else None
+    except Exception as e:
+        print(f"Error fetching question from the database: {e}")
+        return None
+    finally:
+        connection.close()

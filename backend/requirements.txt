@@ -7,4 +7,12 @@ transformers
 numpy
 pandas
 psycopg2-binary
+SpeechRecognition
+pydub
+flask-jwt-extended
+flask-bcrypt
+google-generativeai
 
+# pip install --upgrade pip
+
+# source myenv/Scripts/activate

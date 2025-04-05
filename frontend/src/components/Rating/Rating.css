@@ -1,0 +1,52 @@
+.rating-container {
+    background-color: white;
+    padding: 2rem;
+    border-radius: 15px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.rating-item {
+    margin-bottom: 2rem;
+}
+
+.rating-item label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-size: 1.2rem;
+    color: #444;
+}
+
+.rating-control {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.rating-value {
+    min-width: 2.5rem;
+    padding: 0.25rem 0.5rem;
+    background-color: #f0f0f0;
+    border-radius: 8px;
+    font-weight: bold;
+    text-align: center;
+}
+
+.start-button {
+    width: 100%;
+    padding: 1rem;
+    font-size: 1.2rem;
+    margin-top: 2rem;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.start-button:hover {
+    background-color: #45a049;
+}

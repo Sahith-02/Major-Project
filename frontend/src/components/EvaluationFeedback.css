@@ -1,0 +1,24 @@
+.evaluation-feedback {
+    margin-top: 20px;
+    padding: 15px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+  }
+  
+  .difficulty {
+    font-size: 1.1em;
+    color: #555;
+    margin-bottom: 10px;
+  }
+  
+  .score {
+    font-size: 1.2em;
+    color: #333;
+    margin-bottom: 10px;
+  }
+  
+  .feedback {
+    font-size: 1em;
+    color: #555;
+  }

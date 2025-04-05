@@ -1,0 +1,281 @@
+/* auth.css - Only styles for authentication pages (login/register) */
+/* Styles only applied when wrapped with .auth-page class */
+.auth-page {
+  margin: 0;
+  padding: 0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, 
+              Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  background-color: #f4f7f6;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+.auth-page .auth-container {
+  display: flex;
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+.auth-page .auth-background {
+  flex: 1;
+  background: linear-gradient(135deg, rgba(106,17,203,0.8) 0%, rgba(37,117,252,0.8) 100%), 
+              url('/src/register-background.jpg') no-repeat center center;
+  background-size: cover;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  padding: 2rem;
+  position: relative;
+}
+
+.auth-container {
+  display: flex;
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+.auth-background {
+  flex: 1;
+  background: linear-gradient(135deg, rgba(106,17,203,0.8) 0%, rgba(37,117,252,0.8) 100%), 
+              url('/src/register-background.jpg') no-repeat center center;
+  background-size: cover;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  padding: 2rem;
+  position: relative;
+}
+
+.auth-background::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(45deg, rgba(0,0,0,0.1), transparent);
+}
+
+.auth-background h1 {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+  text-align: center;
+  z-index: 1;
+}
+
+.auth-background p {
+  max-width: 400px;
+  text-align: center;
+  opacity: 0.8;
+  z-index: 1;
+}
+
+.auth-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 3rem;
+  background-color: white;
+  box-shadow: -10px 0 30px rgba(0,0,0,0.05);
+}
+
+.auth-content-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  max-width: 400px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.form-section, .social-section {
+  width: 100%;
+}
+
+.form-section h2 {
+  color: #2c3e50;
+  margin-bottom: 1.5rem;
+  font-size: 1.8rem;
+  text-align: center;
+}
+
+.input-wrapper {
+  position: relative;
+  margin-bottom: 1.25rem;
+}
+
+.input-wrapper input {
+  width: 100%;
+  padding: 12px 12px 12px 45px;
+  border: 2px solid #e0e7ff;
+  border-radius: 10px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.input-wrapper .input-icon {
+  position: absolute;
+  left: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #6366f1;
+  opacity: 0.7;
+}
+
+.input-wrapper input:focus {
+  outline: none;
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.auth-button {
+  width: 100%;
+  padding: 12px;
+  background-color: #6366f1;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: all 0.3s ease;
+  font-weight: 600;
+}
+
+.auth-button:hover {
+  background-color: #4f46e5;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.auth-button:disabled {
+  background-color: #a5b4fc;
+  cursor: not-allowed;
+}
+
+.auth-error {
+  color: #e74c3c;
+  background-color: #fff5f5;
+  border: 1px solid #fecaca;
+  text-align: center;
+  padding: 10px;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+}
+
+.social-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 1.5rem 0;
+  width: 100%;
+  color: #6b7280;
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  flex: 1;
+  border-top: 1px solid #e5e7eb;
+}
+
+.divider span {
+  padding: 0 15px;
+  background: white;
+  font-weight: 500;
+}
+
+.google-login-container {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.google-login-container > div {
+  width: 100% !important;
+  max-width: 350px;
+}
+
+.auth-link {
+  text-align: center;
+  color: #6b7280;
+  margin-top: 1rem;
+}
+
+.auth-link a {
+  color: #6366f1;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.auth-link a:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+  .auth-container {
+    flex-direction: column;
+  }
+
+  .auth-background, .auth-content {
+    flex: none;
+    width: 100%;
+    padding: 2rem;
+  }
+}
+
+.auth-page .auth-link {
+  text-align: center;
+  color: #6b7280;
+  margin-top: 1rem;
+}
+
+@media (max-width: 768px) {
+  .auth-page .auth-container {
+    flex-direction: column;
+  }
+}
+
+/* Add/Update these styles in your auth.css */
+.auth-page .login-button {
+  width: 100%;
+  padding: 12px;
+  background-color: #6366f1;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 1rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+}
+
+.auth-page .login-button:hover {
+  background-color: #4f46e5;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.auth-page .login-button:disabled {
+  background-color: #a5b4fc;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
