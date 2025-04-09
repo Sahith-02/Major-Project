@@ -87,7 +87,7 @@ def handle_submit_answer():
 
         evaluation = evaluate_answer(data['answer'], data['question'], data['difficulty'])
         
-        print("Evaluation result:", evaluation)
+        print(f"Model answer from evaluation: {evaluation.get('model_answer')}")
         
         if 'weak_areas' not in evaluation or not isinstance(evaluation['weak_areas'], list):
             evaluation['weak_areas'] = []
@@ -102,7 +102,8 @@ def handle_submit_answer():
             feedback=evaluation['feedback'],
             weak_areas=evaluation['weak_areas'],
             strong_areas=evaluation['strong_areas'],
-            question=data['question'] 
+            question=data['question'],
+            model_answer=evaluation.get('model_answer', 'No model answer generated')
         )
         
         if not evaluation_id:
@@ -120,7 +121,8 @@ def handle_submit_answer():
                 "score": evaluation['score'],
                 "feedback": evaluation['feedback'],
                 "weak_areas": evaluation['weak_areas'],
-                "strong_areas": evaluation['strong_areas']
+                "strong_areas": evaluation['strong_areas'],
+                "model_answer": evaluation.get('model_answer', '')
             },
             "followup_questions": followup_questions,
             "interview_state": interview_state,
@@ -135,6 +137,7 @@ def handle_submit_answer():
     except Exception as e:
         print(f"Error in submit_answer: {str(e)}")
         return jsonify({"error": str(e)}), 500
+
 
 @evaluation_bp.route('/complete-subject', methods=['POST'])
 def complete_subject():
@@ -203,8 +206,8 @@ def handle_store_evaluation():
     finally:
         if connection:
             connection.close()
-    
-def store_evaluation(user_id, subject, difficulty, score, feedback, weak_areas, strong_areas,question):
+ 
+def store_evaluation(user_id, subject, difficulty, score, feedback, weak_areas, strong_areas, question, model_answer):
     connection = connect_to_db()
     if not connection:
         return None
@@ -220,8 +223,8 @@ def store_evaluation(user_id, subject, difficulty, score, feedback, weak_areas, 
         with connection.cursor() as cursor:
             query = """
             INSERT INTO user_evaluations 
-            (user_id, subject, difficulty, score, feedback, weak_areas, strong_areas, evaluation_date,question)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+            (user_id, subject, difficulty, score, feedback, weak_areas, strong_areas, evaluation_date, question, gemini_answer)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             RETURNING id;
             """
             
@@ -234,7 +237,8 @@ def store_evaluation(user_id, subject, difficulty, score, feedback, weak_areas, 
                 weak_areas,
                 strong_areas,
                 datetime.now(),
-                question
+                question,
+                model_answer
             ))
             evaluation_id = cursor.fetchone()[0]
             connection.commit()
@@ -245,7 +249,8 @@ def store_evaluation(user_id, subject, difficulty, score, feedback, weak_areas, 
         return None
     finally:
         connection.close()
-                
+
+
 def extract_score(score_str):
     # Convert "8/10" to 80
     if '/' in score_str:

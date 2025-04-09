@@ -60,11 +60,102 @@ def generate_followup_questions(user_response, context_question, previous_follow
 
 
 
-
-
 def evaluate_answer(user_response, question, difficulty):
     try:
-        # Use a supported model
+        model = genai.GenerativeModel("gemini-1.5-pro-latest")
+
+        prompt = f"""
+        You MUST follow these steps EXACTLY:
+
+        1. FIRST provide a COMPLETE model answer to this question that would score 10/10.
+        2. THEN evaluate the user's answer against this model answer.
+
+        **Question:** {question}
+        **Difficulty:** {difficulty}
+        **User Answer:** {user_response}
+
+        --- REQUIRED OUTPUT FORMAT ---
+        
+        MODEL ANSWER: [Your complete model answer here. This MUST be at least 3-5 sentences demonstrating perfect understanding.]
+
+        SCORE: [X/10] 
+        (X must be between 1-10 based on how close the user answer is to the model answer)
+
+        FEEDBACK: [Specific feedback comparing user answer to model answer]
+
+        STRONG AREAS:
+        - [Area 1]
+        - [Area 2]
+
+        WEAK AREAS:
+        - [Area 1]
+        - [Area 2]
+
+        --- END FORMAT ---
+
+        Important Rules:
+        - You MUST include the MODEL ANSWER section
+        - The model answer MUST be comprehensive
+        - If any section is missing, I'll ask you to regenerate
+        """
+
+        response = model.generate_content(prompt)
+        feedback = response.text
+
+        # Parse the response with strict requirements
+        evaluation = {
+            "model_answer": "",
+            "score": "N/A",
+            "feedback": "",
+            "strong_areas": [],
+            "weak_areas": []
+        }
+
+        # Extract model answer - this is now mandatory
+        if "MODEL ANSWER:" in feedback:
+            model_part = feedback.split("MODEL ANSWER:")[1].split("SCORE:")[0].strip()
+            evaluation["model_answer"] = model_part
+        else:
+            raise ValueError("Model answer section is missing from Gemini response")
+
+        # Rest of parsing remains the same...
+        if "SCORE:" in feedback:
+            score_part = feedback.split("SCORE:")[1].split("\n")[0].strip()
+            evaluation["score"] = score_part
+
+        if "FEEDBACK:" in feedback:
+            feedback_part = feedback.split("FEEDBACK:")[1].split("STRONG AREAS:")[0].strip()
+            evaluation["feedback"] = feedback_part
+
+        # Parse strong and weak areas
+        if "STRONG AREAS:" in feedback:
+            strong_part = feedback.split("STRONG AREAS:")[1].split("WEAK AREAS:")[0].strip()
+            evaluation["strong_areas"] = [line[2:].strip() for line in strong_part.split("\n") if line.startswith("-")]
+
+        if "WEAK AREAS:" in feedback:
+            weak_part = feedback.split("WEAK AREAS:")[1].strip()
+            evaluation["weak_areas"] = [line[2:].strip() for line in weak_part.split("\n") if line.startswith("-")]
+
+        return evaluation
+
+    except Exception as e:
+        print(f"Error in evaluation: {str(e)}")
+        # Retry once if model answer is missing
+        try:
+            print("Retrying evaluation...")
+            response = model.generate_content(prompt)
+            feedback = response.text
+            # Parse again...
+        except Exception as retry_e:
+            print(f"Retry failed: {str(retry_e)}")
+            return {
+                "model_answer": "Error: Could not generate model answer",
+                "score": "N/A",
+                "feedback": "Evaluation failed. Please try again.",
+                "strong_areas": [],
+                "weak_areas": []
+            }
+    try:
         model = genai.GenerativeModel("gemini-1.5-pro-latest")
 
         # Adjust evaluation criteria based on difficulty
@@ -93,35 +184,64 @@ def evaluate_answer(user_response, question, difficulty):
             - Clarity and conciseness (1-10)
             """
 
-        prompt = f"""
-        Evaluate the following answer to the question on a scale of 1 to 10, where 1 is poor and 10 is excellent. 
-        Provide a concise evaluation, constructive feedback, and identify strong and weak areas.
+        # prompt = f"""
+        # First, provide a model answer to this question that would score 10/10. Then evaluate the user's answer against this model answer.
 
-        **Difficulty Level:** {difficulty.capitalize()}
-        **Question:** {question}
-        **Answer:** {user_response}
+        # **Difficulty Level:** {difficulty.capitalize()}
+        # **Question:** {question}
 
-        **Evaluation Criteria:**
-        {criteria}
+        # **Step 1: Model Answer**
+        # Provide a comprehensive, ideal answer to the question that demonstrates complete understanding.
 
-        **Output Format:**
-        - Score: [Overall Score]/10
-        - Feedback: [Concise feedback in 1-2 sentences]
-        - Strong Areas: [List at least 1-3 strong points about the answer, each on a new line starting with '-']
-        - Weak Areas: [List at least 1-3 areas that need improvement, each on a new line starting with '-']
-        """
+        # **Step 2: User Answer Evaluation**
+        # Evaluate this user answer: {user_response}
 
-        # Generate evaluation
+        # **Evaluation Criteria:**
+        # {criteria}
+
+        # **Output Format:**
+        # - Model Answer: [The ideal answer to the question]
+        # - Score: [Overall Score]/10
+        # - Feedback: [Concise feedback comparing user answer to model answer]
+        # - Strong Areas: [List at least 1-3 strong points about the answer]
+        # - Weak Areas: [List at least 1-3 areas that need improvement]
+        # """
+
+#         prompt = f"""
+# First, provide a model answer to this question that would score 10/10. Then evaluate the user's answer against this model answer.
+
+# **Question:** {question}
+
+# **Step 1: Model Answer**
+# Provide a comprehensive, ideal answer to the question that demonstrates complete understanding.
+
+# **Step 2: User Answer Evaluation**
+# Evaluate this user answer: {user_response}
+
+# **Output Format:**
+# - Model Answer: [The ideal answer to the question]
+# - Score: [Overall Score]/10
+# - Feedback: [Concise feedback comparing user answer to model answer]
+# - Strong Areas: [List strong points]
+# - Weak Areas: [List areas needing improvement]
+# """
+                 
         response = model.generate_content(prompt)
         feedback = response.text
 
         # Initialize the return structure with default values
         evaluation = {
+            "model_answer": "",
             "score": "N/A",
             "feedback": "An error occurred while parsing the evaluation.",
             "strong_areas": [],
             "weak_areas": []
         }
+
+        # Extract model answer if available
+        if "Model Answer:" in feedback:
+            model_answer_part = feedback.split("Model Answer:")[1].split("\n")[0].strip()
+            evaluation["model_answer"] = model_answer_part
 
         # Extract score if available
         if "Score:" in feedback:
@@ -158,17 +278,19 @@ def evaluate_answer(user_response, question, difficulty):
     except google_exceptions.NotFound as e:
         print(f"Gemini API Error: {e}")
         return {
+            "model_answer": "Model answer not available",
             "score": "N/A",
             "feedback": "An error occurred while evaluating your answer.",
             "strong_areas": [],
             "weak_areas": []
         }
-
     except Exception as e:
         print(f"Error evaluating answer: {e}")
         return {
+            "model_answer": "Model answer not available",
             "score": "N/A",
             "feedback": "An error occurred while evaluating your answer.",
             "strong_areas": [],
             "weak_areas": []
         }
+        

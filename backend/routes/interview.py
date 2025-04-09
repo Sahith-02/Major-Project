@@ -208,6 +208,10 @@ def start_interview():
                 "error": f"No more questions available for {current_subject}."
             }), 404
 
+
+
+
+# Updated submit_answer route in interview.py
 @interview_bp.route('/submit-answer', methods=['POST'])
 def submit_answer():
     global follow_up_questions_cache
@@ -230,7 +234,10 @@ def submit_answer():
         # Provide a default evaluation if Gemini fails
         evaluation = {
             "score": 5,
-            "feedback": "Your answer has been recorded. Due to high demand, detailed feedback is not available at this moment."
+            "feedback": "Your answer has been recorded. Due to high demand, detailed feedback is not available at this moment.",
+            "model_answer": "Model answer not available",
+            "weak_areas": [],
+            "strong_areas": []
         }
 
     try:
@@ -262,7 +269,13 @@ def submit_answer():
     interview_state["completed_subjects"] = completed_subjects
 
     return jsonify({
-        "evaluation": evaluation,
+        "evaluation": {
+            "score": evaluation['score'],
+            "feedback": evaluation['feedback'],
+            "weak_areas": evaluation.get('weak_areas', []),
+            "strong_areas": evaluation.get('strong_areas', []),
+            "model_answer": evaluation.get('model_answer', '')
+        },
         "followup_questions": followup_questions,
         "interview_state": interview_state,
         "round_number": round_counter,
@@ -271,28 +284,3 @@ def submit_answer():
         "total_rounds": current_rounds_limit,
         "subject": current_subject
     })
-
-@interview_bp.route('/reset-interview', methods=['POST'])
-def reset_interview():
-    """Reset the interview system for a new user session"""
-    global question_counter, round_counter, current_questions_limit, current_rounds_limit
-    global current_subject, available_subjects, completed_subjects, follow_up_questions_cache
-    global is_first_question_in_round, current_difficulty
-    
-    # Reset all interview state variables
-    question_counter = 0
-    round_counter = 1
-    current_questions_limit = 0
-    current_rounds_limit = 0
-    current_subject = ''
-    current_difficulty = ''
-    available_subjects = subjects.copy()
-    completed_subjects = []
-    follow_up_questions_cache = []
-    is_first_question_in_round = True
-    
-    return jsonify({
-        "message": "Interview reset successfully",
-        "available_subjects": available_subjects
-    })
-    
