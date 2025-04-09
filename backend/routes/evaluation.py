@@ -50,7 +50,8 @@ def get_user_evaluations():
                     'weak_areas': eval[6],
                     'strong_areas': eval[7],
                     'evaluation_date': eval[8].isoformat() if eval[8] else None,
-                    'question': eval[10]  # Make sure this is included
+                    'question': eval[10],
+                    'user_answer': eval[11]# Make sure this is included
                 })
 
         return jsonify({    
@@ -103,7 +104,8 @@ def handle_submit_answer():
             weak_areas=evaluation['weak_areas'],
             strong_areas=evaluation['strong_areas'],
             question=data['question'],
-            model_answer=evaluation.get('model_answer', 'No model answer generated')
+            model_answer=evaluation.get('model_answer', 'No model answer generated'),
+            user_answer=data['answer']
         )
         
         if not evaluation_id:
@@ -207,7 +209,7 @@ def handle_store_evaluation():
         if connection:
             connection.close()
  
-def store_evaluation(user_id, subject, difficulty, score, feedback, weak_areas, strong_areas, question, model_answer):
+def store_evaluation(user_id, subject, difficulty, score, feedback, weak_areas, strong_areas, question, model_answer,user_answer=None):
     connection = connect_to_db()
     if not connection:
         return None
@@ -223,8 +225,8 @@ def store_evaluation(user_id, subject, difficulty, score, feedback, weak_areas, 
         with connection.cursor() as cursor:
             query = """
             INSERT INTO user_evaluations 
-            (user_id, subject, difficulty, score, feedback, weak_areas, strong_areas, evaluation_date, question, gemini_answer)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            (user_id, subject, difficulty, score, feedback, weak_areas, strong_areas, evaluation_date, question, gemini_answer,user_answer)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             RETURNING id;
             """
             
@@ -238,7 +240,8 @@ def store_evaluation(user_id, subject, difficulty, score, feedback, weak_areas, 
                 strong_areas,
                 datetime.now(),
                 question,
-                model_answer
+                model_answer,
+                user_answer
             ))
             evaluation_id = cursor.fetchone()[0]
             connection.commit()
